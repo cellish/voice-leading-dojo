@@ -1,0 +1,36 @@
+和声道場（Voice-Leading Dojo）
+
+Copyright (c) 2026 jun. All rights reserved.
+
+【日本語】
+
+このアプリのソースコード、画面の文章、例題とその解説の著作権は jun にあります。
+
+公開しているサイト（https://cellish.github.io/voice-leading-dojo/）では、
+どなたでも無料でアプリを使えます。個人の練習のほか、授業やレッスンでの利用も含みます。
+
+ソースコードは見られるように公開していますが、オープンソースではありません。
+複製、改変、再配布、販売、およびこのアプリを元にした別のアプリやサービスの公開には、
+著作権者の許可が必要です。
+
+このアプリが利用している他者の著作物（フォントなど）については、
+THIRD_PARTY_NOTICES.md を参照してください。
+
+【English】
+
+Copyright (c) 2026 jun. All rights reserved.
+
+The source code, interface text, and the example exercises and their
+explanations in this application are the copyright of jun.
+
+Anyone may use the application free of charge on the published site
+(https://cellish.github.io/voice-leading-dojo/), including for personal
+practice and for use in classes or lessons.
+
+The source code is publicly viewable, but this is not open-source software.
+Copying, modifying, redistributing, or selling it, or publishing another
+application or service based on it, requires permission from the
+copyright holder.
+
+For third-party works used by this application (such as fonts), see
+THIRD_PARTY_NOTICES.md.
