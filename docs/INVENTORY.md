@@ -19,7 +19,7 @@
 
 **言語・ビルド・公開**
 - HTML、CSS、素の JavaScript（ES2015 以降、IIFE の中に全部書く）。フレームワーク、ビルド、npm はどれも使っていない。
-- 公開先は GitHub `cellish/voice-leading-dojo`（公開リポジトリ）。GitHub Pages 向けに `.nojekyll` を置いているが、Pages はまだ公開を確認できていない（`PROGRESS.md`）。
+- 公開先は GitHub `cellish/voice-leading-dojo`（公開リポジトリ）。GitHub Pages 向けに `.nojekyll` を置いているが、Pages はまだ公開を確認できていない（`STATUS.md`・`PLAN.md`）。
 - 同じアプリの古い版が claude.ai のアーティファクトとして別にある（このリポジトリの外）。
 
 **ファイル構成**
@@ -29,7 +29,7 @@
 | `README.md` | 説明と著作権の節 |
 | `LICENSE` | All rights reserved（日本語と英語） |
 | `THIRD_PARTY_NOTICES.md` | Google Fonts の4書体の一覧 |
-| `CLAUDE.md` / `PROGRESS.md` | 開発の約束と進捗（未コミット） |
+| `CLAUDE.md` / `STATUS.md` / `PLAN.md` | 開発の約束、現状、未完了の作業 |
 | `.nojekyll` | GitHub Pages 用 |
 
 ## 2. 音楽データの表し方（最重要）
@@ -202,7 +202,7 @@
 - **状態がすべて `st` に集まり、描画は毎回 `svg.innerHTML` を作り直す**。部品として切り出すには、状態と描画を分ける必要がある。
 - **音部記号の見た目が Noto Music の読み込みに依存する**：読み込めないと端末のフォントに代わり、`fitClefs()` で大きさは合わせるが、形は変わる。
 - TODO、FIXME のコメントはない。
-- 教本の章ごとの規則はまだ入っていない（利用者が後で入力する予定。`PROGRESS.md`）。
+- 教本の章ごとの規則はまだ入っていない（利用者が後で入力する予定。`PLAN.md`）。
 
 ## 7. 作者のメモ
 
