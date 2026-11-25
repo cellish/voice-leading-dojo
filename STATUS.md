@@ -1,7 +1,7 @@
 ---
 app: 和声道場(Voice-Leading Dojo)
 stage: 試作          # 構想 / 試作 / 公開中 / 保守
-url:                 # 公開予定: https://cellish.github.io/voice-leading-dojo/(GitHub Pages の公開は未確認)
+url:                 # 未公開。GitHub Pages は無効(2026-11-26 確認)。有効にすると https://cellish.github.io/voice-leading-dojo/
 updated: 2026-11-26
 ---
 ## 実装済み（要約）
@@ -18,7 +18,7 @@ updated: 2026-11-26
 - 書法コア: docs/INVENTORY.md の共通部品の検討
 
 ## 次の一手（1〜2件）
-- GitHub Pages の公開を確認する(設定は利用者が行う。main / root)
+- GitHub Pages を有効にする(設定は利用者が行う。main / root)
 - 教本の章ごとの規則の反映
 
 ## 共通部品の状況

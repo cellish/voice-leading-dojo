@@ -3,7 +3,7 @@
 完了したら削除し、STATUS.md の「実装済み」に1行で要約する。履歴は git。
 
 ## 作業
-- GitHub Pages の公開を確認する(設定は利用者が行う。main / root。公開予定の URL は https://cellish.github.io/voice-leading-dojo/)
+- GitHub Pages を有効にする(設定は利用者が行う。main / root。2026-11-26 に無効を確認。有効にすると https://cellish.github.io/voice-leading-dojo/)
 - 教本の章ごとの規則(利用者があとで入力する)を `RULES` と `check()` に反映する
 - 「＋4」「＋6」の既定値を教本の扱いに合わせる(今は「＋4」単独は 6/＋4/2、「＋6」単独は ＋6/3 とみなす。どちらも設定で変えられる)
 - `.git/vld.bundle` は作業の残りなので、消してよい(利用者の確認のうえで)
