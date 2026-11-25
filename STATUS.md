@@ -3,6 +3,11 @@ app: 和声道場(Voice-Leading Dojo)
 stage: 試作          # 構想 / 試作 / 公開中 / 保守
 url:                 # 未公開。GitHub Pages は無効(2026-11-26 確認)。有効にすると https://cellish.github.io/voice-leading-dojo/
 updated: 2026-11-26
+os:                  # 対応 / 一部制限 / 非対応 / 未確認
+  macos: 未確認
+  ios: 未確認        # iPadOS を含む
+  windows: 未確認
+  android: 未確認
 ---
 ## 実装済み（要約）
 - 数字付き低音のバスに上3声を書き、禁則をその場で判定する練習アプリ(`index.html` 1ファイル、ビルドなし)
@@ -26,8 +31,8 @@ updated: 2026-11-26
 - 禁則の判定(`RULES`・`check()`): 独自実装
 - 音の再生(平均律・純正律の合成): 独自実装
 - 数字付き低音の解析(`parseExercise`・`parseFig`): 独自実装
-## OS対応状況
-- macOS: 対応(幅 1280px で表示を確認。クリックまたはキーボードで入力)
-- iOS / iPadOS: 未確認(幅 480px の表示は確認。実機の記録なし。MIDI・マイクは使わない)
-- Windows: 未確認
-- Android: 未確認
+## OS / ブラウザ対応状況
+- macOS: Chrome 未確認 / Safari 未確認(確認手順は CLAUDE.md にあるが、確認した記録がない)
+- iOS / iPadOS: 未確認(幅 480px の確認手順はあるが、実機の記録なし。MIDI・マイクは使わない)
+- Windows: Chrome / Edge 未確認
+- Android: Chrome 未確認
