@@ -34,5 +34,5 @@ os:                  # 対応 / 一部制限 / 非対応 / 未確認
 ## OS / ブラウザ対応状況
 - macOS: Chrome 未確認 / Safari 未確認(確認手順は CLAUDE.md にあるが、確認した記録がない)
 - iOS / iPadOS: 未確認(幅 480px の確認手順はあるが、実機の記録なし。MIDI・マイクは使わない)
-- Windows: Chrome / Edge 未確認
+- Windows: Chrome 未確認
 - Android: Chrome 未確認
