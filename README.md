@@ -29,10 +29,4 @@
 
 Copyright (c) 2026 jun. All rights reserved.
 
-公開サイトでは、どなたでも無料で使えます（個人の練習、授業やレッスンでの利用を含みます）。
-
-ソースは見られるように公開していますが、オープンソースではありません。詳しくは [`LICENSE`](LICENSE) を参照してください。
-
-フォントは Google Fonts から読み込んでいます（Shippori Mincho B1、Zen Kaku Gothic New、Noto Serif、Noto Music。いずれも SIL Open Font License 1.1）。一覧は [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) にあります。
-
-収録している例題6つは、このアプリのために作ったものです。教本の課題は収録していません。
+ライセンスは [`LICENSE`](LICENSE)、同梱・利用している他者の著作物(フォント)と、収録している例題の扱いは [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) を参照してください。
