@@ -14,7 +14,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (C) {
   'use strict';
 
-  const version = '0.4.1';
+  const version = '0.5.0';
 
   /* 2音の完全協和の種類: 'fifth'(完全5度と複音程)| 'octave'(完全8度と複音程)| 'unison'(完全1度)| null。
    * 綴りで決める(増4度と減5度、減8度などを区別する)。声部が交差していても同じに数える */
@@ -65,12 +65,18 @@
   ];
   const pairVars = (ctx, i, j) => ({ upper: ctx.voice(i).name, lower: ctx.voice(j).name });
 
-  // 前後とも同じ仲間の完全協和(5度→5度、1度・8度→1度・8度)で、両声が同じ方向(parallel)/反対方向(contrary)
+  /* 前後とも同じ仲間の完全協和(5度→5度、1度・8度→1度・8度)で、両声が同じ方向(parallel)/反対方向(contrary)
+   * params.caseFrom  文言の case の決め方。'arrival'(既定。後の音程の種類。GR)|
+   *                  'both'(1度→1度だけを 'unison'、1度と8度が混ざるものは 'octave'。VL。D27(a)) */
   function consecutive(want) {
     return function (view, params, ctx) {
+      const both = params.caseFrom === 'both';
+      if (params.caseFrom !== undefined && !both && params.caseFrom !== 'arrival') throw new RangeError(`caseFrom が不明: ${params.caseFrom}`);
       const out = [];
       arrivals(view, params, ctx, ({ c, i, j, kb, ka, m }) => {
-        if (m === want && sameFamily(ka, kb)) out.push({ refs: fourRefs(view, c, i, j), case: kb, vars: pairVars(ctx, i, j) });
+        if (m !== want || !sameFamily(ka, kb)) return;
+        const kase = both && kb === 'unison' && ka !== 'unison' ? 'octave' : kb;
+        out.push({ refs: fourRefs(view, c, i, j), case: kase, vars: pairVars(ctx, i, j) });
       });
       return out;
     };

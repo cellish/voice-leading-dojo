@@ -29,7 +29,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (C, readRuleset) {
   'use strict';
 
-  const version = '0.4.1';
+  const version = '0.5.0';
   const LEVELS = ['error', 'warn'];
   const OVERRIDES = ['error', 'warn', 'off'];
   const ROLES = ['answer', 'given', 'reference'];

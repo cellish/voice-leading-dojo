@@ -2,6 +2,23 @@
 
 書法の部品(`DojoCore`)。版番号の上げ方は `../CLAUDE.md`。タグは `core-v<版>`(例 `core-v0.1.0`)。
 
+## 0.5.0(2026-11-28)
+段階3b の前半(QUEUE T17、D27(a)(b))。**VL(tonal-4v)の判定が変わる。GR(strict-2v)の判定は1件も変わらない**(`core/test/gr-rules-parity.test.js` が変わらず通る)。
+
+- `rules/motion.js`: `parallel`・`contrary` にパラメータ `caseFrom` を足した。`'arrival'`(既定。後の音程の種類で文言を選ぶ。今までどおり)/ `'both'`(1度→1度だけを `'unison'`、1度と8度が混ざるものは `'octave'`)
+- `data/rulesets/tonal-4v`:
+  - `parallel`・`contrary`: `caseFrom: 'both'`。1度の文言を「{upper}と{lower}が連続1度（同度）です」「…が反行で連続1度（同度）です」に(D27(a))
+  - `hidden`: `prev` を `'notPerfect'` から `'notSameKind'` に(GR と同じ、教本の通常の定義: 同じ向きの動きで完全協和へ入り、前が同じ仲間の完全協和でないもの)。外声の5度→8度(D27(b))に加えて、**8度→5度も並達5度になる**
+  - `augMel` の名前を「増2度・増4度・増5度と、解決しない減5度の旋律進行」に(判定は VL の側。T18)
+
+**VL の判定が変わる点**(VL の記録 `test/baseline/examples.json` に対して。一覧は `core/test/vl-3b-changes.json`、10解答):
+- 同度のまま並行する: 「連続8度」→「連続1度（同度）」(文言だけ。`manual/unison-parallel`・`ex5/shift-22`)
+- 外声が5度→8度へ同じ向きに進みソプラノが跳躍する: `hidden`(並達8度)が新たに出る(`manual/fifth-to-octave-hidden` ほか5件)
+- 外声が8度→5度へ同じ向きに進みソプラノが跳躍する: `hidden`(並達5度)が新たに出る(`ex2/shift-33`・`ex3/shift-33`・`ex4/shift-44`)
+- 期待値は「正しい」側に更新した(`vl-rules-parity.test.js` は、記録との差がちょうどこの一覧になることを確かめる)。VL の記録を作り直すのは、作者の確認の後(T18)
+
+アプリ側の移し方: GR は `src/` をコピーし直すだけ(判定は同じ)。VL は `src/` と `data/rulesets/tonal-4v.js`・`.json` をコピーし、変わる判定を作者が確認してから記録を作り直す(T18)。
+
 ## 0.4.1(2026-11-28)
 速さだけの修正(QUEUE T14。GR の解答探索は候補ごとに判定するため)。入出力と判定は変わらない。
 
@@ -93,4 +110,4 @@ QUEUE T12(VL の音高の計算をコアに置き換える)で足りなかった
 | アプリ | 取り込んだ版 | 確認手順 |
 |---|---|---|
 | GR | 0.4.1 | node test/engine.test.js(判定の記録 test/baseline/ との照合を含む)と 1280/390px の画面。版を上げたら core/test/gr-rules-parity.test.js も |
-| VL | 0.2.0 | node --test(voice-leading-dojo 直下)と 1280/480px の画面 |
+| VL | 0.4.1 | node --test(voice-leading-dojo 直下。test/baseline/examples.json は変えない)と 1280/480px の画面。版を上げたら core/test/vl-rules-parity.test.js も |

@@ -59,7 +59,7 @@ const RULES=[
   {id:'ltOuter',name:'導音が主音へ進まない（ソプラノ）',sev:'error'},
   {id:'ltInner',name:'導音が主音へ進まない（内声）',sev:'warn'},
   {id:'seventh',name:'第7音が2度下行しない',sev:'error'},
-  {id:'augMel',name:'増2度・増4度の旋律進行',sev:'error'},
+  {id:'augMel',name:'増2度・増4度・増5度と、解決しない減5度の旋律進行',sev:'error'},
   {id:'leap',name:'7度またはオクターヴを超える跳躍',sev:'warn'},
   {id:'sameDir',name:'4声すべてが同じ方向へ進む',sev:'warn'}
 ];
@@ -140,7 +140,11 @@ function parseExercise(text,opts){
     bass.push({note,fig,chord});
   });
   if(bass.length>32)throw new Error('バス音は32個までにしてください');
-  return {key,bass,text};
+  // 与えられたバスの増音程・解決しない減5度(augMel と同じ基準)。実施では直せないので判定には出さず、読み込みのときに知らせる
+  const warnings=[];
+  for(let k=0;k+1<bass.length;k++){const B=bass.map(b=>b.note),r=melodicAug(B[k],B[k+1],k+2<B.length?B[k+2]:undefined);
+    if(r)warnings.push('バスの第'+(k+1)+'→'+(k+2)+'音（'+nName(B[k],undefined,(opts||{}).german)+'→'+nName(B[k+1],undefined,(opts||{}).german)+'）が'+r.name+'で'+(r.dim?'、解決していません':'す')+'。実施では直せないので、判定には出しません。');}
+  return {key,bass,text,warnings};
 }
 
 /* ---------- チェック ---------- */
@@ -150,6 +154,28 @@ const VI={S:0,A:1,T:2,B:3};
 function coreView(ex,ans){
   return {voices:VOICES,columns:ex.bass.map((b,k)=>({notes:[ans[k][0],ans[k][1],ans[k][2],b.note].map(n=>n?toPitch(n):null)}))};
 }
+/* 旋律の増音程と減5度(augMel。D14)。a→b の進行を見る。c は b の次の音(次の和音が無ければ undefined、未入力なら null)。
+ * 当てるのは 増2度・増4度・増5度(複音程も単音程に直して)と、直後に反対方向へ2度進まない減5度。
+ * 同じ音名の動き(増1度 = C→C♯ のような半音階的進行)は当てない(和声では普通に使う)。
+ * 減5度の次の音が未入力なら保留(まだ当てない)。最後の和音へ減5度で入ったら、解決できないので当てる。
+ * 返り値は null か { name: '増2度' など, dim: 減5度か, last: 最後の和音へ入ったか }。
+ * 複音程の名前は、単音程の名前にオクターヴを添える(例「増4度（2オクターヴ上）」「減5度（1オクターヴ下）」。作者の決定) */
+function melodicAug(a,b,c){
+  if(!a||!b||dia(a)===dia(b))return null;
+  const up=dia(b)>dia(a),iv=C.interval(toPitch(up?a:b),toPitch(up?b:a));
+  const oct=Math.floor(iv.d/7),nm=q=>q+(iv.dn+1)+'度'+(oct?'（'+oct+'オクターヴ'+(up?'上':'下')+'）':'');
+  if(iv.q==='A'&&(iv.dn===1||iv.dn===3||iv.dn===4))return {name:nm('増'),dim:false,last:false};
+  if(iv.q!=='d'||iv.dn!==4)return null;
+  if(c===null)return null;
+  if(c!==undefined){const d2=dia(c)-dia(b);if(Math.abs(d2)===1&&(d2>0)!==up)return null;}
+  return {name:nm('減'),dim:true,last:c===undefined};
+}
+function augMelMsg(who,r){
+  if(!r.dim)return who+'が'+r.name+'で進んでいます';
+  return r.last?who+'が'+r.name+'で最後の和音へ進んでいます（減5度の後は反対方向へ2度進んで解決します）'
+    :who+'が'+r.name+'で進み、次に反対方向へ2度進んでいません';
+}
+
 function check(ex,ans,cfg){
   const out=[],K=ex.bass.length,key=ex.key,nm=(n,oct)=>nName(n,oct,cfg.german);
   const add=(rule,cells,where,msg)=>{const sev=cfg.sev[rule];if(sev&&sev!=='off')out.push({rule,sev,cells,where,msg});};
@@ -199,9 +225,9 @@ function check(ex,ans,cfg){
         add(v===0?'ltOuter':'ltInner',[[k,v],[k+1,v]],w2,VN[v]+'の導音 '+nm(N[v])+' が主音へ進んでいません');
       if(ch.seventh&&same(N[v],ch.seventh)&&ch.sig!==ch2.sig&&!(dd[v]===-1&&(dm[v]===-1||dm[v]===-2)))
         add('seventh',[[k,v],[k+1,v]],w2,VN[v]+'の第7音 '+nm(N[v])+' が2度下行していません');
-      const ad=Math.abs(dd[v]),am=Math.abs(dm[v]);
-      if(ad===1&&am===3)add('augMel',[[k,v],[k+1,v]],w2,VN[v]+'が増2度で進んでいます');
-      else if(ad===3&&am===6)add('augMel',[[k,v],[k+1,v]],w2,VN[v]+'が増4度で進んでいます');
+      // バス(与えられた声部)は見ない。課題のバスの増音程は parseExercise が warnings で知らせる
+      const nx=k+2<K?ans[k+2][v]:undefined,au=melodicAug(N[v],M[v],nx===undefined?undefined:(nx||null));
+      if(au)add('augMel',[[k,v],[k+1,v]],w2,augMelMsg(VN[v],au));
       put('leap:'+(k+1)+':'+v);
     }
     if(dm.every(x=>x!==null&&x!==0)&&new Set(dm.map(Math.sign)).size===1)
@@ -213,7 +239,7 @@ function check(ex,ans,cfg){
 }
 
 const api={VN,mod,dia,midi,pc,same,toPitch,toClass,fromPitch,fromClass,ACCG,EXAMPLES,RULES,RANGE,
-  nName,parseNote,makeKey,parseKey,ABBR,SHAPE,parseFig,parseExercise,coreView,check};
+  nName,parseNote,makeKey,parseKey,ABBR,SHAPE,parseFig,parseExercise,melodicAug,coreView,check};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 else root.VLT=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

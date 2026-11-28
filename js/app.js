@@ -81,8 +81,8 @@ let armed=false;
 $('resetAns').addEventListener('click',e=>{if(!armed){armed=true;e.target.textContent='もう一度押すと消去します';setTimeout(()=>{armed=false;e.target.textContent='この課題の実施を消去';},3000);return;}
   armed=false;e.target.textContent='この課題の実施を消去';st.ans=st.ans.map(()=>[null,null,null]);st.sel={k:0,v:0};st.focus=-1;commit();});
 $('loadCustom').addEventListener('click',()=>{const t=$('customText').value;$('customErr').textContent='';
-  try{parseExercise(t);}catch(e){$('customErr').textContent=e.message;return;}
-  st.custom=t;delete st.answers.custom;stopAll();setEx('custom');$('customErr').textContent='読み込みました。';});
+  let ex;try{ex=parseExercise(t);}catch(e){$('customErr').textContent=e.message;return;}
+  st.custom=t;delete st.answers.custom;stopAll();setEx('custom');$('customErr').textContent='読み込みました。'+(ex.warnings.length?'　注意：'+ex.warnings.join(''):'');});
 
 /* 起動 */
 load();

@@ -14,7 +14,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const version = '0.4.1';
+  const version = '0.5.0';
 
   const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   const PC = [0, 2, 4, 5, 7, 9, 11];          // 幹音の半音位置

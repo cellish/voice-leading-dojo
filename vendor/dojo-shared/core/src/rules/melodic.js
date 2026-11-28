@@ -13,7 +13,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (C) {
   'use strict';
 
-  const version = '0.4.1';
+  const version = '0.5.0';
 
   /* 大きな跳躍: 声部の、打鍵する隣り合う2音(途中が未入力なら見ない)の跳躍が
    * 「オクターヴを超える」(case 'over')か「7度」(case 'seventh')

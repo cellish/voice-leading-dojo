@@ -133,14 +133,15 @@
      },
      "params": {
       "pairs": "all",
-      "skipCrossed": false
+      "skipCrossed": false,
+      "caseFrom": "both"
      },
      "text": {
       "ja": {
        "msg": {
         "fifth": "{upper}と{lower}が連続5度です",
         "octave": "{upper}と{lower}が連続8度です",
-        "unison": "{upper}と{lower}が連続8度です"
+        "unison": "{upper}と{lower}が連続1度（同度）です"
        }
       },
       "en": {
@@ -158,14 +159,15 @@
      },
      "params": {
       "pairs": "all",
-      "skipCrossed": false
+      "skipCrossed": false,
+      "caseFrom": "both"
      },
      "text": {
       "ja": {
        "msg": {
         "fifth": "{upper}と{lower}が反行で連続5度です",
         "octave": "{upper}と{lower}が反行で連続8度です",
-        "unison": "{upper}と{lower}が反行で連続8度です"
+        "unison": "{upper}と{lower}が反行で連続1度（同度）です"
        }
       },
       "en": {
@@ -184,7 +186,7 @@
      "params": {
       "pairs": "outer",
       "skipCrossed": false,
-      "prev": "notPerfect",
+      "prev": "notSameKind",
       "minUpperMove": 3,
       "refs": "arrival"
      },
@@ -242,7 +244,7 @@
      "rule": "augMel",
      "level": "error",
      "name": {
-      "ja": "増2度・増4度の旋律進行",
+      "ja": "増2度・増4度・増5度と、解決しない減5度の旋律進行",
       "en": ""
      },
      "app": true

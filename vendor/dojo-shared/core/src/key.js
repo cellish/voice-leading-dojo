@@ -19,7 +19,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (C) {
   'use strict';
 
-  const version = '0.4.1';
+  const version = '0.5.0';
   const MODES = ['major', 'minor'];
   const FORMS = ['natural', 'harmonic', 'melodic'];
 

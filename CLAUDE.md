@@ -20,7 +20,7 @@
 - 保存は localStorage のキー `harmony-figured-bass-drill-v1`。形式を変えるときは移行の処理を書く。
 
 ## 書法コア（dojo-shared）
-- 使っている版: **core 0.4.1**（`vendor/dojo-shared/core/VERSION`）。親フォルダの `dojo-shared/core/` からコピーしたもの。
+- 使っている版: **core 0.5.0**（`vendor/dojo-shared/core/VERSION`）。親フォルダの `dojo-shared/core/` からコピーしたもの。
 - 使っているもの: 音名・調の計算（`pitch.js`・`key.js`）と、規則エンジン（`rules.js`・`rules/*.js`）・ruleset `tonal-4v`（`data/rulesets/tonal-4v.js`。正本は同じ名前の `.json`）。声部対の規則 `range`・`crossing`・`parallel`・`contrary`・`hidden`・`leap` は、`check()` がコアの `judge` に判定させ（入力は `coreView`）、VL の形 `{rule, sev, cells, where, msg}` に戻して、今までと同じ位置に並べる。id は VL と同じ。
 - **コアのコピーは直接編集しない。** 直すときは `dojo-shared` で直して版を上げ、コピーし直す。VL の都合は `js/theory.js` の包みで吸収する。
 - 取り込み直す手順: `dojo-shared/core/` の `VERSION`・`CHANGELOG.md`・`src/`（`src/rules/` を含む。`.gitkeep` などは要らない）・`data/rulesets/tonal-4v.js` と `.json` を `vendor/dojo-shared/core/` に上書きでコピー → 新しく読み込むファイルがあれば `index.html` と `js/theory.js` の `require` に足す → `node --test` と 1280/480px の画面の確認。コピーとアプリの変更は、dojo-shared の変更とは別のコミット。
@@ -30,6 +30,7 @@
 - 名前は「和声道場」、英語名は「Voice-Leading Dojo」。道場シリーズの一つ。
 - 準拠する教程は林達也『新しい和声』。和音は数字付き低音で表す（芸大和声の記号は使わない）。
 - 判定は「エラー／注意／オフ」を規則ごとに切り替える。模範解答は1つに決めない。
+- 増音程の旋律進行（`augMel`、`melodicAug`）: S・A・T の増2度・増4度・増5度（複音程は「増4度（1オクターヴ上）」のように単音程の名前で）と、直後に反対方向へ2度進まない減5度。増1度（同じ音名の半音の動き）は当てない。減5度の次の音が未入力なら保留、最後の和音へ入ったら当てる。与えられたバスは判定に出さず、課題の読み込みのときに知らせる（`parseExercise` の `warnings`）。D14・作者の決定（2026-11-28）。
 - 短調は自然短音階で読み、導音は「＋」で示す。「＋4」単独は 6/＋4/2、「＋6」単独は ＋6/3 とみなす（どちらも設定で変えられる）。
 - 純正律は、和音ごとに根音を基準にした5限界の比で鳴らす。
 - 例題6つは自作。教本の課題はアプリに収録しない（利用者が「課題を入力」で入れる）。
@@ -44,7 +45,7 @@
 
 ## 確認
 - JS の構文：`js/*.js` を `node --check` にかける。
-- 判定：`node --test`（`test/baseline.test.mjs`）。`check()` の結果が `test/baseline/examples.json` の記録と同じことを確かめる。規則を意図して変えたときだけ `node test/baseline/generate.mjs` で記録を作り直す。
+- 判定：`node --test`（`test/baseline.test.mjs`）。`check()` の結果が `test/baseline/examples.json` の記録と同じことを確かめる。規則を意図して変えたときだけ、まず `node test/baseline/changes.mjs > test/baseline/CHANGES-<段階>.md` で変わる判定の一覧を作って作者に確かめてもらい、それから `node test/baseline/generate.mjs` で記録を作り直す（`node --test` は `test/` の下の `.mjs` をすべて実行するが、この2つはテストの実行中は何もしない）。
 - 表示：幅 1280px と 480px でスクリーンショットを撮り、コンソールエラーと横スクロールがないことを確かめる。
 
 ## git
