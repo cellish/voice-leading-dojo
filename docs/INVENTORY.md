@@ -3,6 +3,7 @@
 書法コアを検討するための一覧。2026-11-20 時点の `index.html`（613行、コミット e3ac7dc と同じ内容）を読んで書いた。
 推測で書いたところには「（推測）」を付けた。行番号は `index.html` のもの。
 **2026-11-28 に `index.html` を `css/`・`js/` に分けた。この文書の行番号は、分ける前の `index.html`（コミット e3ac7dc）のもの。対応は、計算部 = `js/theory.js`、状態と保存 = `js/state.js`、譜表 = `js/staff.js`、音 = `js/audio.js`、画面 = `js/app.js`。**
+**同日、音名・調の計算（`midi`・`same`・`nName`・`parseNote`・`makeKey`・`parseKey`）の中身を書法コア core 0.2.0（`vendor/dojo-shared/core/`）に置き換えた。`{l,a,o}` の形と調のオブジェクトの形は変えていない。`norm`・`NAT`・`LET`・`JLET`・`ACCT` は無くなった。下の記述は置き換え前のもの。**
 
 ## 1. 概要
 

@@ -3,19 +3,27 @@
 数字付き低音（林達也『新しい和声』の表記）から4声体を書く練習アプリ。現状は `STATUS.md`、未完了の作業は `PLAN.md`、中身の一覧は `docs/INVENTORY.md`。
 
 ## 構成
-- `index.html`：アプリ本体の HTML。`css/style.css` と `js/*.js`（classic script。この順に読む）を読み込む。ビルドもパッケージ管理もない。
+- `index.html`：アプリ本体の HTML。`css/style.css`、書法コア（`vendor/dojo-shared/core/src/` の `pitch.js`・`time.js`・`key.js`）、`js/*.js`（classic script。この順に読む）を読み込む。ビルドもパッケージ管理もない。
+- `vendor/dojo-shared/`：道場シリーズの書法コアのコピー（下の「書法コア」）。**編集しない。**
 - `js/theory.js`：DOM・localStorage・画面の状態に触れない計算部（音名・調・数字付き低音の解析・`RULES`・`check`）。ブラウザでは `VLT`、Node では `require` で使う。`check(ex, ans, cfg)` は課題・解答・設定を引数で受け取る。
 - `js/state.js`（状態 `st`・保存・計算部の呼び出し口）、`js/staff.js`（譜表の描画）、`js/audio.js`（音）、`js/app.js`（画面・操作・起動）。最上位の宣言は全ファイルで共有される（名前を重ねない）。
 - `test/`：`harness.mjs`（`index.html` が読む `js/` を vm とスタブで読み込む）、`baseline.test.mjs`・`app.test.mjs`、`baseline/`（判定結果の記録）。
 - `LICENSE` / `THIRD_PARTY_NOTICES.md` / `README.md`：著作権表示、利用フォントの一覧、説明。
-- 外部から読み込むのは Google Fonts だけ。ライブラリは使っていない。音は Web Audio API で合成している。
+- 外部から読み込むのは Google Fonts だけ。外部のライブラリは使っていない（書法コアは作者の非公開の部品）。音は Web Audio API で合成している。
 
 ## コードの要点（js/）
-- 音は `{l: 音名 0–6 (C–B), a: 変化 -2–2, o: オクターヴ}` で表す。異名同音を区別する。MIDI 番号は `midi()` で、全音階上の位置は `dia()` で得る。
+- 音は `{l: 音名 0–6 (C–B), a: 変化 -2–2, o: オクターヴ}` で表す。異名同音を区別する。コアの音高 `{step, alter}` とは `step = o*7 + l` で対応し、`js/theory.js` の `toPitch`・`toClass`・`fromPitch`・`fromClass` で変換する。MIDI 番号は `midi()`、全音階上の位置は `dia()`（= `step`）。
+- 音名・調の計算（`midi`・`same`・`nName`・`parseNote`・`makeKey`・`parseKey`）の中身はコアの関数。`js/theory.js` に残すのは VL の決まり（`{l,a,o}` の形、オクターヴ1桁、調の大文字＝長調・小文字＝短調、調のオブジェクトの `sig`・`tl`・`ta`・`lt`）の薄い包みだけ。
 - 課題は `"調 バス:数字 …"` という文字列で書く（例：`a  A2 C3:6 E3:+ A2`）。`parseExercise()` → `parseFig()` で和音の構成音・根音・第7音を求める。
 - 規則は `js/theory.js` の `RULES` に一覧（id・名前・既定の重さ）を持ち、判定は同じファイルの `check()` で行う。規則を足すときはこの2か所を直す。
 - 描画は `js/staff.js` の `drawStaff()`（SVG）、再生は `js/audio.js` の `playAll()` / `freqs()`（純正律の比は `JR`）。
 - 保存は localStorage のキー `harmony-figured-bass-drill-v1`。形式を変えるときは移行の処理を書く。
+
+## 書法コア（dojo-shared）
+- 使っている版: **core 0.2.0**（`vendor/dojo-shared/core/VERSION`）。親フォルダの `dojo-shared/core/` からコピーしたもの。
+- **コアのコピーは直接編集しない。** 直すときは `dojo-shared` で直して版を上げ、コピーし直す。VL の都合は `js/theory.js` の包みで吸収する。
+- 取り込み直す手順: `dojo-shared/core/` の `VERSION`・`CHANGELOG.md`・`src/` を `vendor/dojo-shared/core/` に上書きでコピー → 新しく読み込むファイルがあれば `index.html` と `js/theory.js` の `require` に足す → `node --test` と 1280/480px の画面の確認。コピーとアプリの変更は、dojo-shared の変更とは別のコミット。
+- 判定結果が変わる版（MINOR が上がる）では、`vendor/dojo-shared/core/CHANGELOG.md` で変わった判定を作者が確認してから取り込む。
 
 ## 設計方針
 - 名前は「和声道場」、英語名は「Voice-Leading Dojo」。道場シリーズの一つ。
