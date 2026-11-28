@@ -99,7 +99,8 @@ function serialize(b) {
     return lines.join('\n');
 }
 
-if (import.meta.url === new URL(process.argv[1], 'file:').href) {
+// node --test は test/ の下の .mjs をすべて実行するので、そのときは記録を書かない(NODE_TEST_CONTEXT はテストの実行中に入る)
+if (import.meta.url === new URL(process.argv[1], 'file:').href && !process.env.NODE_TEST_CONTEXT) {
     const b = buildBaseline();
     writeFileSync(OUT, serialize(b));
     const missing = Object.entries(b.coverage).filter(([, n]) => n === 0).map(([id]) => id);
