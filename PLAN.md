@@ -12,6 +12,7 @@
 - 判定が怪しい挙動を直すか決める(2026-11-28 に `test/baseline/` で記録した現状。どちらも `test/baseline/manual.mjs` に解答がある。直したら `node test/baseline/generate.mjs` で記録を作り直す)
   - 同度のまま並行して進むと「連続8度」と出る(`P5` が同度と8度を分けず、`parallel`/`contrary` の文言が `'8度'` 固定。`manual/unison-parallel`)
   - 外声が完全5度から完全8度へ、同じ方向にソプラノが跳躍して入っても、`hidden` にも `parallel` にもならない(`hidden` は前の音程が `P5` でないときだけ、`parallel` は前後が同じ種類のときだけ。`manual/fifth-to-octave-hidden`)。意図かどうかは作者に確認(推測: 意図ではなく見落とし)
+  - 保存データの読み込み(`js/state.js` の `load()`)が `cfg.sev` を保存の内容で置き換えるため、保存に無い規則の重さが未定義になり、その規則が出なくなる(今は保存が全規則ぶんなので起きないが、規則を足したときに起きる。`test/app.test.mjs` の保存データのテストに注記あり)
   - `augMel` が減5度・増5度を出さない(上の `augMel` の項目で直す。`manual/dim5-melodic`・`manual/aug5-melodic`)
 
 ## 検討事項
