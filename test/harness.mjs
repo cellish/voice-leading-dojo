@@ -5,10 +5,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const HTML_PATH = new URL('../index.html', import.meta.url);
+const THEORY_PATH = new URL('../js/theory.js', import.meta.url);
 
 function loadScript() {
     const html = readFileSync(HTML_PATH, 'utf8');
-    const start = html.indexOf('<script>\n') + '<script>\n'.length;
+    const start = html.indexOf('<script>\n') + '<script>\n'.length; // src の付かない（インラインの）スクリプト
     const end = html.lastIndexOf('</script>');
     let js = html.slice(start, end);
     const tail = js.lastIndexOf('})();');
@@ -54,6 +55,7 @@ export function loadApp({ storage = {} } = {}) {
         setTimeout: () => 1, clearTimeout() {},
         localStorage: { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } }
     });
+    vm.runInContext(readFileSync(THEORY_PATH, 'utf8'), context, { filename: 'js/theory.js' });
     vm.runInContext(loadScript(), context, { filename: 'index.html' });
     return { vl: context.__vl, elements };
 }
