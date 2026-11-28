@@ -2,20 +2,28 @@
  * 音名・調・数字付き低音の解析・規則の判定(check)。DOM・localStorage・画面の状態に触れない純粋な計算部。
  * ブラウザ(globalThis.VLT)と Node(module.exports)のどちらでも動く。
  * check(ex, ans, cfg) は課題・解答・設定を引数で受け取る(画面の状態 st は読まない)。
+ * 音高の計算は書法コア(vendor/dojo-shared/core/。直接編集しない)に任せ、ここは VL の形 {l, a, o} との薄い包みだけ。
+ * ブラウザでは vendor/dojo-shared/core/src/ の pitch.js → time.js → key.js の後に読み込む。
  */
 (function(root){
 'use strict';
+const isNode=typeof module!=='undefined'&&module.exports;
+const CORE='../vendor/dojo-shared/core/src/';
+const C=isNode?Object.assign({},require(CORE+'pitch.js'),require(CORE+'time.js'),require(CORE+'key.js')):root.DojoCore;
+if(!C||!C.toMidi||!C.keySignature)throw new Error('theory.js は vendor/dojo-shared/core/src/ の pitch.js・time.js・key.js の後に読み込む');
 /* ---------- 基本 ---------- */
-const LET=['C','D','E','F','G','A','B'], NAT=[0,2,4,5,7,9,11];
-const JLET=['ハ','ニ','ホ','ヘ','ト','イ','ロ'];
 const VN=['ソプラノ','アルト','テノール','バス'];
 const mod=(x,m)=>((x%m)+m)%m;
-const norm=x=>mod(x+6,12)-6;
+/* VL の音 {l, a, o} ↔ コアの音高 {step, alter}(step = o*7 + l)・音名 {letter, alter} */
 const dia=n=>n.o*7+n.l;
-const midi=n=>12*(n.o+1)+NAT[n.l]+n.a;
-const same=(a,b)=>a&&b&&a.l===b.l&&a.a===b.a;
+const toPitch=n=>({step:dia(n),alter:n.a});
+const toClass=n=>({letter:n.l,alter:n.a});
+const fromPitch=p=>({l:mod(p.step,7),a:p.alter,o:Math.floor(p.step/7)});
+const fromClass=p=>({l:p.letter,a:p.alter});
+const midi=n=>C.toMidi(toPitch(n));
+const pc=n=>C.pitchClassNumber(toClass(n)); // 半音の数 0〜11(オクターヴの無い音でもよい)
+const same=(a,b)=>!!a&&!!b&&C.sameSpelling(toClass(a),toClass(b));
 const ACCG={'-2':'𝄫','-1':'♭','0':'♮','1':'♯','2':'𝄪'};
-const ACCT={'-2':'𝄫','-1':'♭','0':'','1':'♯','2':'𝄪'};
 
 /* ---------- 課題（例題はこのドリル用の自作） ---------- */
 const EXAMPLES=[
@@ -50,35 +58,30 @@ const RULES=[
 const RANGE=[[60,79],[55,74],[48,67],[40,60]]; // S A T B（MIDI）
 
 /* ---------- 音名 ---------- */
+// 表示は ♯・♭・𝄪・𝄫(コアの unicode)かドイツ式。oct===false ならオクターヴを付けない
 function nName(n,oct,german){
-  let s;
-  if(german){
-    const b=['C','D','E','F','G','A','H'][n.l];
-    if(n.a===0)s=b;
-    else if(n.a===1)s=b+'is';else if(n.a===2)s=b+'isis';
-    else if(n.a===-1)s=n.l===6?'B':n.l===2?'Es':n.l===5?'As':b+'es';
-    else s=(n.l===6?'Heses':b+'eses');
-  }else s=LET[n.l]+ACCT[n.a];
+  const s=C.formatPitchClass(toClass(n),{style:german?'german':'unicode'});
   return oct===false?s:s+n.o;
 }
+// "G2"・"C#3"・"Bb2"。オクターヴは1桁(0〜9)だけ受け付ける(VL の決まり)。読めなければ null
 function parseNote(s){
-  const m=/^([A-Ga-g])(𝄪|x|##|#|♯|bb|b|♭|𝄫)?(\d)$/.exec(s);if(!m)return null;
-  const am={'𝄪':2,'x':2,'##':2,'#':1,'♯':1,'bb':-2,'𝄫':-2,'b':-1,'♭':-1};
-  return {l:LET.indexOf(m[1].toUpperCase()),a:m[2]?am[m[2]]:0,o:+m[3]};
+  if(typeof s!=='string'||!/^\D+\d$/.test(s))return null;
+  let p;try{p=C.parsePitch(s);}catch(e){return null;}
+  return p.step<0?null:fromPitch(p);
 }
+/* 調のオブジェクト。tl・ta=主音、sig=文字番号ごとの調号の変化、scale=自然短音階/長音階、lt=導音、
+ * name=日本語の調名、core=コアの調 {tonic, mode} */
 function makeKey(l,a,mode){
-  const tpc=mod(NAT[l]+a,12),pat=mode==='maj'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10];
-  const sig={};const scale=[];
-  for(let i=0;i<7;i++){const L=(l+i)%7,acc=norm(mod(tpc+pat[i],12)-NAT[L]);sig[L]=acc;scale.push({l:L,a:acc});}
-  const ltl=(l+6)%7;
-  const pre=a>0?'嬰':a<0?'変':'';
-  return {tl:l,ta:a,mode,tpc,sig,scale,lt:{l:ltl,a:norm(mod(tpc+11,12)-NAT[ltl])},
-    name:pre+JLET[l]+(mode==='maj'?'長調':'短調')};
+  const key={tonic:{letter:l,alter:a},mode:mode==='maj'?'major':'minor'};
+  return {tl:l,ta:a,mode,tpc:C.pitchClassNumber(key.tonic),sig:Object.assign({},C.keySignature(key).alters),
+    scale:C.scaleOf(key,'natural').map(fromClass),lt:fromClass(C.leadingTone(key)),
+    name:C.formatKey(key,{style:'ja'}),core:key};
 }
+// 大文字は長調、小文字は短調(VL の決まり)。変化記号は1つまで
 function parseKey(s){
-  const m=/^([A-Ga-g])(#|♯|b|♭)?$/.exec(s);if(!m)return null;
-  const up=m[1]===m[1].toUpperCase();
-  return makeKey(LET.indexOf(m[1].toUpperCase()),m[2]?(/[#♯]/.test(m[2])?1:-1):0,up?'maj':'min');
+  if(typeof s!=='string'||!/^[A-Ga-g](#|♯|b|♭)?$/.test(s))return null;
+  const t=C.parsePitchClass(s);
+  return makeKey(t.letter,t.alter,s[0]===s[0].toUpperCase()?'maj':'min');
 }
 
 /* ---------- 数字付き低音の解釈 ---------- */
@@ -198,7 +201,7 @@ function check(ex,ans,cfg){
   return {issues:out,incomplete};
 }
 
-const api={LET,NAT,JLET,VN,mod,norm,dia,midi,same,ACCG,ACCT,EXAMPLES,RULES,RANGE,
+const api={VN,mod,dia,midi,pc,same,toPitch,toClass,fromPitch,fromClass,ACCG,EXAMPLES,RULES,RANGE,
   nName,parseNote,makeKey,parseKey,ABBR,SHAPE,parseFig,parseExercise,P5,check};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 else root.VLT=api;

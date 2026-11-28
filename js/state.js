@@ -3,7 +3,7 @@
  */
 "use strict";
 /* ---------- 基本（計算部は js/theory.js） ---------- */
-const {LET,NAT,JLET,VN,mod,norm,dia,midi,same,ACCG,ACCT,EXAMPLES,RULES,RANGE,parseNote,makeKey,parseKey}=VLT;
+const {VN,mod,dia,midi,pc,same,ACCG,EXAMPLES,RULES,RANGE,parseNote}=VLT;
 /* ---------- 状態と保存 ---------- */
 const KEY='harmony-figured-bass-drill-v1';
 const st={exId:'ex1',ex:null,ans:[],sel:{k:0,v:0},tuning:'et',tempo:1.4,focus:-1,

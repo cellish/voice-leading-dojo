@@ -19,7 +19,7 @@ function freqs(k,tuning){
   const N=[st.ans[k][0],st.ans[k][1],st.ans[k][2],st.ex.bass[k].note].filter(Boolean);
   if(tuning==='et')return N.map(n=>etF(midi(n)));
   const ch=st.ex.bass[k].chord,bm=midi(st.ex.bass[k].note);
-  const rpc=mod(NAT[ch.root.l]+ch.root.a,12),rm=bm-mod(mod(bm,12)-rpc,12),rf=etF(rm);
+  const rpc=pc(ch.root),rm=bm-mod(mod(bm,12)-rpc,12),rf=etF(rm);
   return N.map(n=>{const d=midi(n)-rm;return rf*Math.pow(2,Math.floor(d/12))*JR[mod(d,12)];});
 }
 function playChordAt(k,t0,dur,tuning){freqs(k,tuning).forEach(f=>tone(f,t0,dur,0.13));}
