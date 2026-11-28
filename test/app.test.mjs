@@ -51,3 +51,31 @@ test('ドイツ式の音名の設定が、判定の文言に反映される', ()
     const msgs = plain(vl.check()).issues.map(i => i.msg).join('\n');
     assert.match(msgs, /H4/, 'B4 は H4 と出る');
 });
+
+// 画面の操作（js/ を分けたあとも、ボタンの処理から他のファイルの関数を呼べる）
+test('ボタンの操作で音が動き、判定に反映される（音の再生は AudioContext が無いので何も鳴らない）', () => {
+    const { vl, elements } = loadApp();
+    const click = (id) => elements[id].listeners.click();
+    vl.st.sel = { k: 3, v: 0 };
+    vl.st.ans[3][0] = vl.parseNote('G4');
+    click('up');
+    assert.equal(vl.nName(vl.st.ans[3][0]), 'A4');
+    click('down'); click('down');
+    assert.equal(vl.nName(vl.st.ans[3][0]), 'F4');
+    click('accS');
+    assert.equal(vl.nName(vl.st.ans[3][0]), 'F♯4');
+    click('clr');
+    assert.equal(vl.st.ans[3][0], null);
+    click('tJi');
+    assert.equal(vl.st.tuning, 'ji');
+    click('playAll'); click('stop'); // 再生・停止の処理が例外を出さない
+});
+
+test('譜表のクリックで、押した高さの音が入る', () => {
+    const { vl, elements } = loadApp();
+    vl.st.sel = { k: 4, v: 1 };
+    const g = vl.geo; // 譜表の座標（描画で決まる）。4番目の和音の列の中央を押す
+    elements.staff.listeners.click({ clientX: (g.head + 4 * 62 + 31) * 800 / g.W, clientY: 100 });
+    assert.ok(vl.st.ans[4][1], 'アルトに音が入る');
+    assert.ok(plain(vl.check()).incomplete >= 0);
+});
