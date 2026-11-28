@@ -2,15 +2,23 @@
  * 音名・調・数字付き低音の解析・規則の判定(check)。DOM・localStorage・画面の状態に触れない純粋な計算部。
  * ブラウザ(globalThis.VLT)と Node(module.exports)のどちらでも動く。
  * check(ex, ans, cfg) は課題・解答・設定を引数で受け取る(画面の状態 st は読まない)。
- * 音高の計算は書法コア(vendor/dojo-shared/core/。直接編集しない)に任せ、ここは VL の形 {l, a, o} との薄い包みだけ。
- * ブラウザでは vendor/dojo-shared/core/src/ の pitch.js → time.js → key.js の後に読み込む。
+ * 音高の計算と声部対の規則(range・crossing・parallel・contrary・hidden・leap)の判定は書法コア
+ * (vendor/dojo-shared/core/。直接編集しない)に任せ、ここは VL の形 {l, a, o} との薄い包みだけ。
+ * ブラウザでは vendor/dojo-shared/core/ の src/pitch.js → src/time.js → src/key.js → src/rules.js → src/rules/motion.js
+ * → src/rules/melodic.js → data/rulesets/tonal-4v.js の後に読み込む。
  */
 (function(root){
 'use strict';
 const isNode=typeof module!=='undefined'&&module.exports;
-const CORE='../vendor/dojo-shared/core/src/';
-const C=isNode?Object.assign({},require(CORE+'pitch.js'),require(CORE+'time.js'),require(CORE+'key.js')):root.DojoCore;
-if(!C||!C.toMidi||!C.keySignature)throw new Error('theory.js は vendor/dojo-shared/core/src/ の pitch.js・time.js・key.js の後に読み込む');
+const CORE='../vendor/dojo-shared/core/';
+const C=isNode?(()=>{
+  const c=Object.assign({},require(CORE+'src/pitch.js'),require(CORE+'src/time.js'),require(CORE+'src/key.js'),require(CORE+'src/rules.js'));
+  require(CORE+'src/rules/motion.js');require(CORE+'src/rules/melodic.js');
+  c.loadRuleset(require(CORE+'data/rulesets/tonal-4v.js'));return c;})():root.DojoCore;
+if(!C||!C.toMidi||!C.keySignature||!C.judge)throw new Error('theory.js は vendor/dojo-shared/core の src/pitch.js・time.js・key.js・rules.js・rules/*.js・data/rulesets/tonal-4v.js の後に読み込む');
+// 声部対の規則は、コアの judge が ruleset tonal-4v で判定する(id は VL と同じ)
+const RULESET=C.loadRuleset('tonal-4v');
+const CORE_RULES=RULESET.rules.filter(e=>!e.app).map(e=>e.rule);
 /* ---------- 基本 ---------- */
 const VN=['ソプラノ','アルト','テノール','バス'];
 const mod=(x,m)=>((x%m)+m)%m;
@@ -55,7 +63,7 @@ const RULES=[
   {id:'leap',name:'7度またはオクターヴを超える跳躍',sev:'warn'},
   {id:'sameDir',name:'4声すべてが同じ方向へ進む',sev:'warn'}
 ];
-const RANGE=[[60,79],[55,74],[48,67],[40,60]]; // S A T B（MIDI）
+const RANGE=[[60,79],[55,74],[48,67],[40,60]]; // S A T B（MIDI）。判定は ruleset tonal-4v の range(S・A・T。テストが一致を確かめる）。B は解答の生成だけが使う
 
 /* ---------- 音名 ---------- */
 // 表示は ♯・♭・𝄪・𝄫(コアの unicode)かドイツ式。oct===false ならオクターヴを付けない
@@ -136,18 +144,31 @@ function parseExercise(text,opts){
 }
 
 /* ---------- チェック ---------- */
-const P5=(x,y)=>{const s=Math.abs(midi(x)-midi(y)),g=Math.abs(dia(x)-dia(y));return s%12===7&&g%7===4?'5度':(s%12===0&&g%7===0?(s===0?'1度':'8度'):null);};
+/* コアの判定の入力: 列 = 和音、声部は S・A・T(answer)と B(given)。id は ruleset tonal-4v の range が音域を引く名前 */
+const VOICES=['S','A','T','B'].map((id,v)=>({id,name:VN[v],role:v<3?'answer':'given'}));
+const VI={S:0,A:1,T:2,B:3};
+function coreView(ex,ans){
+  return {voices:VOICES,columns:ex.bass.map((b,k)=>({notes:[ans[k][0],ans[k][1],ans[k][2],b.note].map(n=>n?toPitch(n):null)}))};
+}
 function check(ex,ans,cfg){
   const out=[],K=ex.bass.length,key=ex.key,nm=(n,oct)=>nName(n,oct,cfg.german);
   const add=(rule,cells,where,msg)=>{const sev=cfg.sev[rule];if(sev&&sev!=='off')out.push({rule,sev,cells,where,msg});};
   const notes=k=>[ans[k][0],ans[k][1],ans[k][2],ex.bass[k].note];
+  // 声部対の規則はコアで判定し、今まで add していた位置に置く(並び順を変えないため)。重さは cfg.sev(無ければ出さない)
+  const levels={};CORE_RULES.forEach(r=>{levels[r]=cfg.sev[r]||'off';});
+  const found=C.judge(coreView(ex,ans),RULESET,{levels,noteStyle:cfg.german?'german':'unicode'});
+  const at={};let placed=0;
+  for(const x of found){const cells=x.refs.map(r=>[r.col,VI[r.voice]]),k=x.span.to,trans=x.rule!=='range'&&x.rule!=='crossing';
+    const key=x.rule==='range'||x.rule==='crossing'||x.rule==='leap'?x.rule+':'+k+':'+cells[0][1]:'motion:'+k+':'+cells[0][1]+':'+cells[1][1];
+    at[key]={rule:x.rule,sev:x.level,cells,where:trans?'第'+k+'→'+(k+1)+'和音':'第'+(k+1)+'和音',msg:x.msg};}
+  const put=key=>{if(at[key]){out.push(at[key]);placed++;}};
   let incomplete=0;
   for(let k=0;k<K;k++){
     const N=notes(k),ch=ex.bass[k].chord,w='第'+(k+1)+'和音';
     if(N.slice(0,3).some(x=>!x))incomplete++;
     for(let v=0;v<3;v++){const n=N[v];if(!n)continue;
       if(!ch.tones.some(t=>same(t,n)))add('chordTone',[[k,v]],w,VN[v]+'の '+nm(n)+' は構成音ではありません（構成音：'+ch.tones.map(t=>nm(t,false)).filter((x,i,a)=>a.indexOf(x)===i).join('・')+'）');
-      const m=midi(n);if(m<RANGE[v][0]||m>RANGE[v][1])add('range',[[k,v]],w,VN[v]+'の '+nm(n)+' は音域外です');
+      put('range:'+k+':'+v);
     }
     if(N.every(Boolean)){
       const has=t=>t&&N.some(n=>same(n,t));
@@ -158,25 +179,14 @@ function check(ex,ans,cfg){
       }
       const lts=[];N.forEach((n,v)=>{if(same(n,key.lt))lts.push([k,v]);});
       if(lts.length>1)add('ltDouble',lts,w,'導音 '+nm(key.lt,false)+' が重複しています');
-      for(let v=0;v<3;v++){if(midi(N[v])<midi(N[v+1]))add('crossing',[[k,v],[k,v+1]],w,VN[v]+'が'+VN[v+1]+'より低くなっています');}
+      for(let v=0;v<3;v++)put('crossing:'+k+':'+v);
       for(let v=0;v<2;v++){if(midi(N[v])-midi(N[v+1])>12)add('spacing',[[k,v],[k,v+1]],w,VN[v]+'と'+VN[v+1]+'の間が1オクターヴを超えています');}
     }
     if(k===K-1)continue;
     const M=notes(k+1),w2='第'+(k+1)+'→'+(k+2)+'和音',ch2=ex.bass[k+1].chord;
     const dm=[0,1,2,3].map(v=>N[v]&&M[v]?midi(M[v])-midi(N[v]):null);
     const dd=[0,1,2,3].map(v=>N[v]&&M[v]?dia(M[v])-dia(N[v]):null);
-    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
-      if(!N[i]||!N[j]||!M[i]||!M[j])continue;
-      const a=P5(N[i],N[j]),b=P5(M[i],M[j]);
-      if(a&&b&&(a===b||(a!=='5度'&&b!=='5度'))&&dm[i]!==0&&dm[j]!==0){
-        const kind=a==='5度'?'5度':'8度';
-        const cells=[[k,i],[k,j],[k+1,i],[k+1,j]];
-        if(Math.sign(dm[i])===Math.sign(dm[j]))add('parallel',cells,w2,VN[i]+'と'+VN[j]+'が連続'+kind+'です');
-        else add('contrary',cells,w2,VN[i]+'と'+VN[j]+'が反行で連続'+kind+'です');
-      }
-      if(i===0&&j===3&&b&&!a&&dm[0]&&dm[3]&&Math.sign(dm[0])===Math.sign(dm[3])&&Math.abs(dm[0])>2)
-        add('hidden',[[k+1,0],[k+1,3]],w2,'外声が並達'+(b==='5度'?'5度':'8度')+'です（ソプラノが跳躍）');
-    }
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)put('motion:'+(k+1)+':'+i+':'+j); // parallel・contrary・hidden(外声)
     for(let v=0;v<3;v++){
       if(N[v]&&M[v+1]&&midi(M[v+1])>midi(N[v]))add('overlap',[[k,v],[k+1,v+1]],w2,VN[v+1]+'が前の和音の'+VN[v]+'より上へ超えています');
       else if(N[v+1]&&M[v]&&midi(M[v])<midi(N[v+1]))add('overlap',[[k,v+1],[k+1,v]],w2,VN[v]+'が前の和音の'+VN[v+1]+'より下へ超えています');
@@ -192,17 +202,18 @@ function check(ex,ans,cfg){
       const ad=Math.abs(dd[v]),am=Math.abs(dm[v]);
       if(ad===1&&am===3)add('augMel',[[k,v],[k+1,v]],w2,VN[v]+'が増2度で進んでいます');
       else if(ad===3&&am===6)add('augMel',[[k,v],[k+1,v]],w2,VN[v]+'が増4度で進んでいます');
-      if(am>12||ad===6)add('leap',[[k,v],[k+1,v]],w2,VN[v]+'が'+(am>12?'オクターヴを超えて':'7度')+'跳躍しています');
+      put('leap:'+(k+1)+':'+v);
     }
     if(dm.every(x=>x!==null&&x!==0)&&new Set(dm.map(Math.sign)).size===1)
       add('sameDir',[[k,0],[k,1],[k,2],[k+1,0],[k+1,1],[k+1,2]],w2,'4声すべてが'+(dm[0]>0?'上':'下')+'行しています');
   }
+  if(placed!==found.length)throw new Error('check: コアの指摘 '+found.length+' 件のうち '+placed+' 件しか並べられなかった');
   out.sort((a,b)=>(a.sev===b.sev?0:a.sev==='error'?-1:1));
   return {issues:out,incomplete};
 }
 
 const api={VN,mod,dia,midi,pc,same,toPitch,toClass,fromPitch,fromClass,ACCG,EXAMPLES,RULES,RANGE,
-  nName,parseNote,makeKey,parseKey,ABBR,SHAPE,parseFig,parseExercise,P5,check};
+  nName,parseNote,makeKey,parseKey,ABBR,SHAPE,parseFig,parseExercise,coreView,check};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 else root.VLT=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
