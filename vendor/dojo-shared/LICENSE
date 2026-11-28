@@ -1,0 +1,17 @@
+Copyright (c) 2026 jun. All rights reserved.
+
+【日本語】
+
+dojo-shared(道場シリーズの共有部品)のソースコード、データ、文章、課題集の著作権は jun にあります。
+
+- このリポジトリは非公開です。ソースコード・データ・文章の複製・改変・再配布・販売、およびこれを元にしたアプリやサービスの公開には、著作権者の許可が必要です。
+- 道場シリーズの各アプリに取り込んだ部分も、このライセンスに従います。各アプリの利用者への条件は、それぞれのアプリの LICENSE に従います。
+- 同梱する他者の著作物(ライブラリ・音源・フォントなど)は、それぞれのライセンスに従います。今は同梱していません。
+
+【English】
+
+The source code, data, text and exercise sets of dojo-shared (shared components of the Dojo series) are copyright (c) 2026 jun. All rights reserved.
+
+- This repository is private. Copying, modifying, redistributing or selling the source code, data or text, or publishing an application or service based on it, requires permission from the copyright holder.
+- Parts incorporated into the applications of the Dojo series remain under this license. The terms for users of each application are given in that application's LICENSE.
+- Third-party works bundled with this repository (libraries, sound fonts, fonts, etc.) are used under their own licenses. None are bundled at present.
