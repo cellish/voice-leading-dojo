@@ -2,7 +2,7 @@
 app: 和声道場(Voice-Leading Dojo)
 stage: 試作          # 構想 / 試作 / 公開中 / 保守
 url:                 # 未公開。GitHub Pages は無効(2026-11-26 確認)。有効にすると https://cellish.github.io/voice-leading-dojo/
-updated: 2026-11-26
+updated: 2026-11-28
 os:                  # 対応 / 一部制限 / 非対応 / 未確認
   macos: 未確認
   ios: 未確認        # iPadOS を含む
@@ -14,6 +14,7 @@ os:                  # 対応 / 一部制限 / 非対応 / 未確認
 - 17項目の規則(連続5度・8度、声部の交差・超越、導音・第7音の解決など)を、規則ごとに「エラー／注意／オフ」で切り替え
 - 全体または1和音を、平均律と純正律で鳴らし比べる(Web Audio で合成)
 - 自作の例題6つ、課題の入力(`"調 バス:数字 …"` の文字列)、実施と設定の localStorage 保存
+- `check()` の判定結果の記録と回帰テスト(`test/`、`node --test`。例題6つ×7通り+手作りの解答4つで全17規則が出る。段階2の前の基準)
 - 著作権表示(All rights reserved、LICENSE、THIRD_PARTY_NOTICES.md、画面下)
 - GitHub `cellish/voice-leading-dojo`(公開)に push 済み。claude.ai のアーティファクト版(旧名「数字付き低音ドリル」)は古いまま
 

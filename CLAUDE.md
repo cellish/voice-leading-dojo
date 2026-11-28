@@ -32,6 +32,7 @@
 
 ## 確認
 - JS の構文：`<script>` の中身を取り出して `node --check` にかける。
+- 判定：`node --test`（`test/baseline.test.mjs`）。`check()` の結果が `test/baseline/examples.json` の記録と同じことを確かめる。規則を意図して変えたときだけ `node test/baseline/generate.mjs` で記録を作り直す。
 - 表示：幅 1280px と 480px でスクリーンショットを撮り、コンソールエラーと横スクロールがないことを確かめる。
 
 ## git
