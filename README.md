@@ -14,13 +14,16 @@
 
 ## 使い方
 
-`index.html` をブラウザで開くだけで動きます。ビルドは不要です。
+`index.html` をブラウザで開くだけで動きます（`css/`・`js/` を同じ場所に置く）。ビルドは不要です。
 
 ## ファイル構成
 
 | ファイル | 役割 |
 |---|---|
-| `index.html` | アプリ本体（HTML・CSS・JavaScript を1ファイルにまとめたもの） |
+| `index.html` | アプリ本体の HTML |
+| `css/style.css` | 見た目 |
+| `js/` | プログラム。`theory.js`（音名・調・数字付き低音の解析・禁則の判定）、`state.js`（状態と保存）、`staff.js`（譜表の描画）、`audio.js`（音）、`app.js`（画面の操作・起動） |
+| `test/` | 判定の確認（`node --test`）。`test/baseline/` に判定結果の記録 |
 | `README.md` | この説明 |
 | `LICENSE` | 著作権表示と利用条件 |
 | `THIRD_PARTY_NOTICES.md` | 利用している他者の著作物（フォント）の一覧 |
