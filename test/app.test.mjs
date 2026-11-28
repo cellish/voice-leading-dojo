@@ -18,7 +18,7 @@ test('アプリが起動し、例題6つと17規則を読める', () => {
 });
 
 test('保存データ（harmony-figured-bass-drill-v1）をそのまま読める', () => {
-    // 保存される sev は全規則ぶん（load() は sev を保存の内容で置き換える。保存に無い規則は未定義になる）
+    // 保存される sev は全規則ぶん
     const sev = Object.fromEntries(newApp().RULES.map(r => [r.id, r.sev]));
     sev.parallel = 'off';
     const saved = { cfg: { german: true, plus4: false, sev }, answers: { ex1: [[{ l: 4, a: 0, o: 4 }, null, null]] }, custom: '', exId: 'ex2', tuning: 'ji', tempo: 2 };
@@ -29,6 +29,16 @@ test('保存データ（harmony-figured-bass-drill-v1）をそのまま読める
     assert.equal(vl.st.cfg.sev.parallel, 'off');
     assert.equal(vl.st.cfg.sev.crossing, 'error');
     assert.equal(vl.st.cfg.plus4, false);
+});
+
+test('保存に無い規則は既定の重さになる', () => {
+    const defs = Object.fromEntries(newApp().RULES.map(r => [r.id, r.sev]));
+    const saved = { cfg: { sev: { parallel: 'off' } } };
+    const { vl } = loadApp({ storage: { 'harmony-figured-bass-drill-v1': JSON.stringify(saved) } });
+    assert.equal(vl.st.cfg.sev.parallel, 'off');
+    for (const [id, sev] of Object.entries(defs)) {
+        if (id !== 'parallel') assert.equal(vl.st.cfg.sev[id], sev, id);
+    }
 });
 
 test('画面側の check() が、記録した判定結果と同じ（既定の設定と「全部 error」）', () => {

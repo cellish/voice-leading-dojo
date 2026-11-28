@@ -17,6 +17,7 @@ os:                  # 対応 / 一部制限 / 非対応 / 未確認
 - 計算部を `js/theory.js`、見た目を `css/style.css`、その他を `js/` の4ファイルに分けた(動きは同じ。1280/480px のスクリーンショットが分ける前と一致。D08・段階2の前半)
 - 音名・調の計算を書法コア core 0.2.0（`vendor/dojo-shared/core/`）に置き換えた。保存形式・規則 id・判定は同じ（基準の記録と 1280/480px の画面が前と一致。段階2の後半）
 - `check()` の判定結果の記録と回帰テスト(`test/`、`node --test`。例題6つ×7通り+手作りの解答4つで全17規則が出る。段階2の前の基準)
+- 保存データの読み込みで、保存に無い規則は既定の重さになる(`load()` を直した。判定は変わらない。D27 の (c))
 - 著作権表示(All rights reserved、LICENSE、THIRD_PARTY_NOTICES.md、画面下)
 - GitHub `cellish/voice-leading-dojo`(公開)に push 済み。claude.ai のアーティファクト版(旧名「数字付き低音ドリル」)は古いまま
 
