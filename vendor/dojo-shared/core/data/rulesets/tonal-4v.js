@@ -1,0 +1,287 @@
+/* dojo-shared core — data/rulesets/tonal-4v.js
+ * tonal-4v.json と同じ中身を、<script>・Worker の importScripts・Node の require で読める形にしたもの
+ * (core はネットワークに触れないので、ブラウザでは JSON を fetch しない)。
+ * 正本は tonal-4v.json。直すときは両方を同じに直す(core/test/rulesets.test.js が一致を確かめる)。
+ * ブラウザ・Worker: rules.js の後に読み込むと DojoCore.loadRuleset で定義する。Node: データをそのまま返す。
+ */
+(function (root, def) {
+  if (typeof module === 'object' && module.exports) module.exports = def;
+  else if (root.DojoCore && root.DojoCore.loadRuleset) root.DojoCore.loadRuleset(def);
+  else throw new Error('data/rulesets/tonal-4v.js は rules.js の後に読み込む');
+})(typeof globalThis !== 'undefined' ? globalThis : this,
+  {
+   "id": "tonal-4v",
+   "style": "tonal",
+   "texture": 4,
+   "name": {
+    "ja": "和声(四声)",
+    "en": ""
+   },
+   "about": "VL(voice-leading-dojo)の規則の既定(RULES の sev)。規則の並びと名前は VL の RULES。app: true はまだ VL の check が判定する規則。声部は4つ(id S・A・T・B、上から順。バスは given、上3声は answer)",
+   "extends": null,
+   "params": {},
+   "rules": [
+    {
+     "rule": "chordTone",
+     "level": "error",
+     "name": {
+      "ja": "和音の構成音でない音",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "missingTone",
+     "level": "error",
+     "name": {
+      "ja": "根音・第3音・第7音の欠落",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "missingFifth",
+     "level": "warn",
+     "name": {
+      "ja": "三和音の第5音の省略",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "ltDouble",
+     "level": "error",
+     "name": {
+      "ja": "導音の重複",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "range",
+     "level": "warn",
+     "name": {
+      "ja": "声部の音域外",
+      "en": ""
+     },
+     "params": {
+      "roles": [
+       "answer"
+      ],
+      "ranges": {
+       "S": [
+        60,
+        79
+       ],
+       "A": [
+        55,
+        74
+       ],
+       "T": [
+        48,
+        67
+       ]
+      }
+     },
+     "text": {
+      "ja": {
+       "msg": "{voice}の {note} は音域外です"
+      },
+      "en": {
+       "msg": "",
+       "why": ""
+      }
+     }
+    },
+    {
+     "rule": "crossing",
+     "level": "error",
+     "name": {
+      "ja": "声部の交差",
+      "en": ""
+     },
+     "params": {
+      "pairs": "adjacent",
+      "compare": "midi",
+      "requireComplete": true
+     },
+     "text": {
+      "ja": {
+       "msg": "{upper}が{lower}より低くなっています"
+      },
+      "en": {
+       "msg": "",
+       "why": ""
+      }
+     }
+    },
+    {
+     "rule": "spacing",
+     "level": "error",
+     "name": {
+      "ja": "隣り合う上声部の間隔が1オクターヴを超える",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "parallel",
+     "level": "error",
+     "name": {
+      "ja": "連続5度・連続8度（並行）",
+      "en": ""
+     },
+     "params": {
+      "pairs": "all",
+      "skipCrossed": false
+     },
+     "text": {
+      "ja": {
+       "msg": {
+        "fifth": "{upper}と{lower}が連続5度です",
+        "octave": "{upper}と{lower}が連続8度です",
+        "unison": "{upper}と{lower}が連続8度です"
+       }
+      },
+      "en": {
+       "msg": "",
+       "why": ""
+      }
+     }
+    },
+    {
+     "rule": "contrary",
+     "level": "error",
+     "name": {
+      "ja": "反行による連続5度・連続8度",
+      "en": ""
+     },
+     "params": {
+      "pairs": "all",
+      "skipCrossed": false
+     },
+     "text": {
+      "ja": {
+       "msg": {
+        "fifth": "{upper}と{lower}が反行で連続5度です",
+        "octave": "{upper}と{lower}が反行で連続8度です",
+        "unison": "{upper}と{lower}が反行で連続8度です"
+       }
+      },
+      "en": {
+       "msg": "",
+       "why": ""
+      }
+     }
+    },
+    {
+     "rule": "hidden",
+     "level": "warn",
+     "name": {
+      "ja": "外声の並達5度・8度（ソプラノ跳躍）",
+      "en": ""
+     },
+     "params": {
+      "pairs": "outer",
+      "skipCrossed": false,
+      "prev": "notPerfect",
+      "minUpperMove": 3,
+      "refs": "arrival"
+     },
+     "text": {
+      "ja": {
+       "msg": {
+        "fifth": "外声が並達5度です（ソプラノが跳躍）",
+        "octave": "外声が並達8度です（ソプラノが跳躍）",
+        "unison": "外声が並達8度です（ソプラノが跳躍）"
+       }
+      },
+      "en": {
+       "msg": "",
+       "why": ""
+      }
+     }
+    },
+    {
+     "rule": "overlap",
+     "level": "warn",
+     "name": {
+      "ja": "声部の超越",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "ltOuter",
+     "level": "error",
+     "name": {
+      "ja": "導音が主音へ進まない（ソプラノ）",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "ltInner",
+     "level": "warn",
+     "name": {
+      "ja": "導音が主音へ進まない（内声）",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "seventh",
+     "level": "error",
+     "name": {
+      "ja": "第7音が2度下行しない",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "augMel",
+     "level": "error",
+     "name": {
+      "ja": "増2度・増4度の旋律進行",
+      "en": ""
+     },
+     "app": true
+    },
+    {
+     "rule": "leap",
+     "level": "warn",
+     "name": {
+      "ja": "7度またはオクターヴを超える跳躍",
+      "en": ""
+     },
+     "params": {
+      "roles": [
+       "answer"
+      ],
+      "measure": "semitones"
+     },
+     "text": {
+      "ja": {
+       "msg": {
+        "over": "{voice}がオクターヴを超えて跳躍しています",
+        "seventh": "{voice}が7度跳躍しています"
+       }
+      },
+      "en": {
+       "msg": "",
+       "why": ""
+      }
+     }
+    },
+    {
+     "rule": "sameDir",
+     "level": "warn",
+     "name": {
+      "ja": "4声すべてが同じ方向へ進む",
+      "en": ""
+     },
+     "app": true
+    }
+   ]
+  }
+);
